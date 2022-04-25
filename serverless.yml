@@ -1,0 +1,42 @@
+service: api-management
+
+frameworkVersion: '3'
+
+plugins:
+  - serverless-offline
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  apiKeys:
+    - free: ${file(./default-customers.js):private}
+    - paid:
+      - myPaidKey
+      - paidUser@example.com
+  usagePlan: 
+    - free:
+        quota:
+          limit: 5
+          period: MONTH
+        throttle:
+          burstLimit: 1
+          rateLimit: 1
+    - paid:
+        quota:
+          limit: 1000
+          period: DAY
+        throttle:
+          burstLimit: 16
+          rateLimit: 50
+
+functions:
+  hello:
+    handler: handler.hello
+    events:
+      - http:
+          path: hello
+          method: get
+          private: true
+
+package:
+  excludeDevDependencies: true
