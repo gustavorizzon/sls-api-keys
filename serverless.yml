@@ -8,26 +8,35 @@ plugins:
 provider:
   name: aws
   runtime: nodejs14.x
-  apiKeys:
-    - free: ${file(./default-customers.js):private}
-    - paid:
-      - myPaidKey
-      - paidUser@example.com
-  usagePlan: 
-    - free:
-        quota:
-          limit: 5
-          period: MONTH
-        throttle:
-          burstLimit: 1
-          rateLimit: 1
-    - paid:
-        quota:
-          limit: 1000
-          period: DAY
-        throttle:
-          burstLimit: 16
-          rateLimit: 50
+  region: us-east-1
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - apigateway:GET
+        - apigateway:POST
+      Resource:
+        - arn:aws:apigateway:${self:provider.region}::/*
+  apiGateway:
+    apiKeys:
+      - free: ${file(./default-customers.js):private}
+      - paid:
+        - myPaidKey
+        - paidUser@example.com
+    usagePlan: 
+      - free:
+          quota:
+            limit: 5
+            period: MONTH
+          throttle:
+            burstLimit: 1
+            rateLimit: 1
+      - paid:
+          quota:
+            limit: 1000
+            period: DAY
+          throttle:
+            burstLimit: 16
+            rateLimit: 50
 
 functions:
   hello:
@@ -37,6 +46,18 @@ functions:
           path: hello
           method: get
           private: true
+  getUsage:
+    handler: handler.usage
+    events:
+      - http:
+          path: getUsage
+          method: get
+  getUsagePlans:
+    handler: handler.usagePlans
+    events:
+      - http:
+          path: getUsagePlans
+          method: get
 
 package:
   excludeDevDependencies: true

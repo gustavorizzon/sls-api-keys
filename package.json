@@ -14,5 +14,8 @@
     "nodemon": "^2.0.15",
     "serverless": "^3.15.2",
     "serverless-offline": "^8.7.0"
+  },
+  "dependencies": {
+    "moment": "^2.29.3"
   }
 }
