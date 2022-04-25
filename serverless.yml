@@ -58,6 +58,12 @@ functions:
       - http:
           path: getUsagePlans
           method: get
+  addKey:
+    handler: handler.addKey
+    events:
+      - http:
+          path: addKey
+          method: get
 
 package:
   excludeDevDependencies: true

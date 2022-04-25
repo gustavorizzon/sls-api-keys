@@ -38,8 +38,50 @@ const usagePlans = async (event) => {
   };
 }
 
+const addKey = async (event) => {
+  const { name, usagePlanId } = event.queryStringParameters
+
+  console.log('received', { name, usagePlanId })
+  
+  const planKeys = await apiGateway.getUsagePlanKeys({ usagePlanId }).promise()
+  
+  console.log('planKeys', planKeys)
+
+  const { items: [{ type: keyType }]} = planKeys
+
+  const apiKeyCreated = await apiGateway.createApiKey({ 
+    name,
+    enabled: true
+  }).promise()
+
+  console.log('apiKeyCreated', apiKeyCreated)
+
+  const apiKeyId = apiKeyCreated.id
+  const apiKeyToken = apiKeyCreated.value
+
+  const linkApiKey = await apiGateway.createUsagePlanKey({
+    keyId: apiKeyId,
+    keyType,
+    usagePlanId
+  }).promise()
+
+  console.log('API key + Usage plan key', linkApiKey)
+
+  const message = `Use ${apiKeyId} to check quota and 'x-api-key' ${apiKeyToken} to make requests`
+  
+  return {
+    statusCode: 200,
+    body: JSON.stringify({
+      apiKeyToken,
+      apiKeyId,
+      message
+    }, null, 2)
+  };
+}
+
 module.exports = {
   hello,
   usage,
-  usagePlans
+  usagePlans,
+  addKey
 }
